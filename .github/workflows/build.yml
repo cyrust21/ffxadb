@@ -1,4 +1,4 @@
-name: Build Native C++ (Gradle Minimal)
+name: Build C++ Native (CMake Murni)
 
 on:
   push:
@@ -6,43 +6,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-cpp:
     runs-on: ubuntu-latest
+    
+    # Targetkan arsitektur 64-bit yang modern
+    strategy:
+      matrix:
+        abi: [arm64-v8a]
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v5 # Diperbarui ke v5 agar tidak ada warning
-        with:
-          distribution: 'temurin'
-          java-version: '17' 
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7' # INI KUNCI PERBAIKANNYA: Mengunci versi Gradle ke 8.7
-
-      - name: Build with Gradle
+      - name: Compile C++ for ${{ matrix.abi }}
         run: |
-          # Terima semua lisensi Android SDK agar tidak error
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          # Cari NDK terbaru
+          NDK_PATH=$(ls -d $ANDROID_HOME/ndk/* | tail -1)
+          echo "Menggunakan NDK: $NDK_PATH"
           
-          # Gunakan perintah gradle (tanpa ./gradlew) karena ini repo baru
-          gradle assembleDebug
-
-      - name: Extract Native Binaries
-        run: |
-          mkdir -p native_output
+          # Masuk ke folder JNI
+          cd jni
           
-          # Mencari semua file berakhiran .so di hasil build
-          find build/intermediates -type f -name "*.so" -exec cp {} native_output/ \;
+          # Buat folder build
+          BUILD_DIR="build_${{ matrix.abi }}"
+          mkdir -p $BUILD_DIR
+          cd $BUILD_DIR
+          
+          # Jalankan CMake (Akan otomatis mengunduh boringssl)
+          cmake -DCMAKE_TOOLCHAIN_FILE=$NDK_PATH/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=${{ matrix.abi }} \
+                -DANDROID_PLATFORM=android-21 \
+                ..
+                
+          # Jalankan make
+          make
 
-      - name: Upload Artifact
+      - name: Upload Binary Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ffx-native-binaries
-          path: native_output/
+          name: ffx-native-bin-${{ matrix.abi }}
+          path: jni/build_${{ matrix.abi }}/
           compression-level: 9
