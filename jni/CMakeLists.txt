@@ -10,10 +10,10 @@ include(FetchContent)
 FetchContent_Declare(
   boringssl
   GIT_REPOSITORY https://boringssl.googlesource.com/boringssl
-  GIT_TAG master # Gunakan branch master (selalu ada)
+  GIT_TAG master # <-- KITA MENGGUNAKAN MASTER DI SINI
 )
 
-# MATIKAN fitur assembly agar tidak butuh bahasa Go & Perl saat kompilasi
+# MATIKAN fitur assembly agar mudah dikompilasi
 set(OPENSSL_NO_ASM ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(boringssl)
@@ -22,7 +22,6 @@ FetchContent_MakeAvailable(boringssl)
 add_executable(libffxstarter.so
         starter.cpp misc.cpp selinux.cpp cgroup.cpp)
 
-# Tautkan dengan library 'crypto' bawaan boringssl
 target_link_libraries(libffxstarter.so log crypto)
 
 add_library(adb SHARED
