@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.library' version '8.2.0' // Gunakan mode library
+    id 'com.android.library' version '8.2.0'
 }
 
 android {
@@ -10,24 +10,23 @@ android {
         minSdk 21
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_STL=c++_shared"
+                arguments "-DANDROID_STL=none"
             }
         }
     }
-
     buildFeatures {
-        prefab true // INI YANG PALING PENTING
+        prefab true 
     }
-
     externalNativeBuild {
         cmake {
             path "jni/CMakeLists.txt"
+            version = "3.22.1+" 
         }
     }
 }
 
 dependencies {
-    // Gradle akan otomatis mengunduh library Rikka ini dan menyediakannya untuk CMake
-    implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
-    implementation 'dev.rikka.ndk.thirdparty:boringssl:2.0.0'
+    // Library persis seperti yang dipakai Shizuku terbaru
+    implementation 'io.github.vvb2060.ndk:boringssl:20250114'
+    implementation 'org.lsposed.libcxx:libcxx:27.0.12077973'
 }
