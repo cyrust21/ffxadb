@@ -1,0 +1,33 @@
+plugins {
+    id 'com.android.library' version '8.2.0' // Gunakan mode library
+}
+
+android {
+    namespace 'com.cyrust.fftoolspromaxnew'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+    }
+
+    buildFeatures {
+        prefab true // INI YANG PALING PENTING
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "jni/CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    // Gradle akan otomatis mengunduh library Rikka ini dan menyediakannya untuk CMake
+    implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
+    implementation 'dev.rikka.ndk.thirdparty:boringssl:2.0.0'
+}
