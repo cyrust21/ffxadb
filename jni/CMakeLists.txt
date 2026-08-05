@@ -10,7 +10,7 @@ include(FetchContent)
 FetchContent_Declare(
   boringssl
   GIT_REPOSITORY https://boringssl.googlesource.com/boringssl
-  GIT_TAG master # <-- KITA MENGGUNAKAN MASTER DI SINI
+  GIT_TAG 7378d3864aee7cda2f3b9bf19d67a7ffea9f75d9
 )
 
 # MATIKAN fitur assembly agar mudah dikompilasi
