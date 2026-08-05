@@ -1,1 +1,47 @@
-#
+name: Build Native C++ (Gradle Minimal)
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17' # Versi yang paling stabil untuk Android Gradle Plugin 8.2
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: |
+          # Terima semua lisensi Android SDK agar tidak error
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          
+          # Gunakan perintah gradle (tanpa ./gradlew) karena ini repo baru
+          gradle assembleDebug
+
+      - name: Extract Native Binaries
+        run: |
+          mkdir -p native_output
+          
+          # File executable "starter" pada CMakeLists Anda didefinisikan sebagai libffxstarter.so
+          # Jadi kita cukup mencari semua file berakhiran .so di hasil build
+          find build/intermediates -type f -name "*.so" -exec cp {} native_output/ \;
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffx-native-binaries
+          path: native_output/
+          compression-level: 9
